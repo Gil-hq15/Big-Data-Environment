@@ -1,0 +1,73 @@
+version: '3.7'
+
+services:
+  jupyter:
+    image: jupyter/all-spark-notebook
+    platform: linux/arm64
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./jupyter_notebooks:/home/jovyan/work
+      - ./scripts:/home/jovyan/work
+    depends_on:
+      - spark-master
+    command: >
+      bash -c "pip install pyspark && start-notebook.sh"
+    networks:
+      - spark-cluster
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_PASSWORD: bigdata2023
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - spark-cluster
+
+  mongodb:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - spark-cluster
+
+  redis:
+    image: redis:7.0
+    ports:
+      - "6379:6379"
+    networks:
+      - spark-cluster
+
+  spark-master:
+    image: bitnami/spark:3.5.0
+    platform: linux/arm64
+    ports:
+      - "8080:8080"
+    environment:
+      - SPARK_MODE=master
+    networks:
+      - spark-cluster
+  
+  spark-worker:
+    image: bitnami/spark:3.5.0
+    platform: linux/arm64
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER=spark://spark-master:7078
+    depends_on:
+      - spark-master
+    networks:
+      - spark-cluster
+
+networks:
+  spark-cluster:
+    driver: bridge
+
+volumes:
+  pg_data:
+  mongo_data:
