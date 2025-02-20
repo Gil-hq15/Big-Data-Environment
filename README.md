@@ -21,7 +21,7 @@
     ### 3.2. PySpark testing  
    - Execute the following command:  
      ```sh
-     docker exec -it <CONTAINER-NAME> python ./home/jovyan/work/test_spark.py
+     docker exec -it Big-Data-Environment-jupyter-1 python /home/jovyan/work/test_spark.py
      ```
 
     ### 3.3. Resource testing  
